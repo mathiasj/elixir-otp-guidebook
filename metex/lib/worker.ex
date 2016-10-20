@@ -1,4 +1,14 @@
 defmodule Metex.Worker do
+    def loop do
+        receive do
+            {sender_pid, location} ->
+                send(sender_pid, {:ok, temperature_of(location)})
+            _ ->
+                IO.puts "don't know how to process this message"
+        end
+        loop
+    end
+
     def temperature_of(location) do
         result = location |> url_for |> HTTPoison.get |> parse_response
         case result do
@@ -7,6 +17,15 @@ defmodule Metex.Worker do
             :error ->
                 "#{location} not found"
         end
+    end
+
+    def temperatures_of(cities) do
+        coordinator_pid = spawn(Metex.Coordinator, :loop, [[], Enum.count(cities)])
+
+        cities |> Enum.each(fn city ->
+            worker_pid = spawn(Metex.Worker, :loop, [])
+            send worker_pid, {coordinator_pid, city}
+        end) 
     end
 
     defp url_for(location) do 
@@ -32,6 +51,6 @@ defmodule Metex.Worker do
     end
 
     defp apikey do
-        "<API-KEY-GOES-HERE>"
+        "<API-KEY-GOES-HERE>
     end    
 end            
