@@ -29,8 +29,7 @@ defmodule Metex.Mixfile do
   defp deps do
     [
      {:httpoison, "~> 0.9.0"},
-     {:json, "~> 1.0.0"}#,
-     #{:earmark, "= 0.1.19"}
+     {:json, "~> 1.0.0"}
     ]
   end
 end
